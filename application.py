@@ -46,49 +46,55 @@ def home():
     return render_template('index.html')
 
 
-@app.route('/predict' , methods=['POST'])
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
-    try:
-        data = request.form
-        Age = float(data["Age"])
-        Fare = float(data["Fare"])
-        Pclass = int(data["Pclass"])
-        Sex = int(data["Sex"])
-        Embarked = int(data["Embarked"])
-        Familysize = int(data["Familysize"])
-        Isalone = int(data["Isalone"])
-        HasCabin = int(data["HasCabin"])
-        Title = int(data["Title"])
-        Pclass_Fare = float(data["Pclass_Fare"])
-        Age_Fare = float(data["Age_Fare"])
+    if request.method == 'POST':
+        try:
+            data = request.form
+            Age = float(data["Age"])
+            Fare = float(data["Fare"])
+            Pclass = int(data["Pclass"])
+            Sex = int(data["Sex"])
+            Embarked = int(data["Embarked"])
+            Familysize = int(data["Familysize"])
+            Isalone = int(data["Isalone"])
+            HasCabin = int(data["HasCabin"])
+            Title = int(data["Title"])
+            Pclass_Fare = float(data["Pclass_Fare"])
+            Age_Fare = float(data["Age_Fare"])
 
-        features = pd.DataFrame([[Age,Fare,Pclass,Sex,Embarked,Familysize,Isalone,HasCabin,Title,Pclass_Fare,Age_Fare]] , columns=FEATURE_NAMES)
+            features = pd.DataFrame([[Age,Fare,Pclass,Sex,Embarked,Familysize,Isalone,HasCabin,Title,Pclass_Fare,Age_Fare]] , columns=FEATURE_NAMES)
 
 
-        ##### Data Drift Detection
-        features_scaled = scaler.transform(features)
+            ##### Data Drift Detection
+            features_scaled = scaler.transform(features)
 
-        drift = ksd.predict(features_scaled)
-        print("Drift Response : ",drift)
+            drift = ksd.predict(features_scaled)
+            print("Drift Response : ",drift)
 
-        drift_response = drift.get('data',{})
-        is_drift = drift_response.get('is_drift' , None)
+            drift_response = drift.get('data',{})
+            is_drift = drift_response.get('is_drift' , None)
 
-        if is_drift is not None and is_drift==1:
-            print("Drift Detected....")
-            logger.info("Drift Detected....")
+            if is_drift is not None and is_drift==1:
+                print("Drift Detected....")
+                logger.info("Drift Detected....")
 
-            drift_count.inc()
+                drift_count.inc()
 
-        prediction = model.predict(features)[0]
-        prediction_count.inc()
+            prediction = model.predict(features)[0]
+            prediction_count.inc()
 
-        result = 'Survived' if prediction==1 else 'Did Not Survive'
+            result = 'Survived' if prediction==1 else 'Did Not Survive'
 
-        return render_template('index.html' , prediction_text = f"The predictions is : {result}")
+            return render_template('index.html' , prediction_text = f"The predictions is : {result}")
     
-    except Exception as e:
-        return jsonify({'error' : str(e)})
+        except Exception as e:
+            return jsonify({'error' : str(e)})
+
+    else:
+        # Affichage ou redirection si nécessaire
+        return render_template('index.html')
+
     
 @app.route('/metrics')
 def metrics():
