@@ -8,3 +8,7 @@ redis
 flask
 alibi-detect
 prometheus_client
+torch 
+tensorflow
+python-dotenv
+

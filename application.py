@@ -64,6 +64,7 @@ def predict():
 
         features = pd.DataFrame([[Age,Fare,Pclass,Sex,Embarked,Familysize,Isalone,HasCabin,Title,Pclass_Fare,Age_Fare]] , columns=FEATURE_NAMES)
 
+
         ##### Data Drift Detection
         features_scaled = scaler.transform(features)
 
@@ -78,7 +79,6 @@ def predict():
             logger.info("Drift Detected....")
 
             drift_count.inc()
-
 
         prediction = model.predict(features)[0]
         prediction_count.inc()
@@ -100,5 +100,3 @@ def metrics():
 if __name__ =="__main__":
     start_http_server(8000)
     app.run(debug=True , host='0.0.0.0' , port=5000)
-
-
